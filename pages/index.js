@@ -173,7 +173,6 @@ const CaptureComponent = () => {
 
           {isLoading && (
             <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-              <div className="text-white font-bold text-2xl">Loading...</div>\
               <img src="/loading.svg" alt="loading" className="w-16 h-16" />
             </div>
           )}
