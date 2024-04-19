@@ -1,19 +1,32 @@
 import useWindowSize from '@/hooks/useSize';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
+
+let classes = ["cardboard", "glass", "metal", "paper", "plastic", "trash"]
 
 const CaptureComponent = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [predictedClass, setPredictedClass] = useState(null);
+  const [predictedProbability, setPredictedProbability] = useState(null);
+
+  const [overallProbabilities, setOverallProbabilities] = useState([]);
+
+  const [showDetails, setShowDetails] = useState(false);
 
   const webcamRef = useRef(null);
 
   async function captureImage() {
     const imageSrc = webcamRef.current.getScreenshot();
     setCapturedImage(imageSrc);
-
-    await getPrediction();
   };
+
+
+
+  useEffect(() => {
+    if (capturedImage) getPrediction();
+  }, [capturedImage]);
 
   async function getPrediction() {
 
@@ -21,7 +34,7 @@ const CaptureComponent = () => {
     // Send data to API endpoint as a POST request
     try {
 
-      const response = await fetch('https://trash-detection-server.onrender.com/predict', {
+      const response = await fetch('https://trash-prediction-server.onrender.com/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,12 +42,9 @@ const CaptureComponent = () => {
         body: JSON.stringify({ image_link: capturedImage }),
       });
       const data = await response.json();
-
-      // expected response
-      // data = {"prediction":{"name":"cardboard","probability":0.7180725932121277},"overall_probabilities":[{"class":"cardboard","probability":0.7180725932121277},{"class":"metal","probability":0.2032327651977539},{"class":"trash","probability":0.04265006259083748},{"class":"plastic","probability":0.020296193659305573},{"class":"glass","probability":0.012044194154441357},{"class":"paper","probability":0.0037041513714939356}]}
-
-      console.log('Prediction:', data.prediction);
-      console.log('Overall probabilities:', data.overall_probabilities);
+      setPredictedClass(data.prediction.name);
+      setPredictedProbability(data.prediction.probability);
+      setOverallProbabilities(data.overall_probabilities);
 
     } catch (error) {
       console.error('Error sending the snapshot:', error);
@@ -45,6 +55,12 @@ const CaptureComponent = () => {
 
   const discardImage = () => {
     setCapturedImage(null);
+
+    setPredictedClass(null);
+    setPredictedProbability(null);
+    setOverallProbabilities([]);
+    setShowDetails(false);
+
   };
 
   let windowSize = useWindowSize();
@@ -93,7 +109,7 @@ const CaptureComponent = () => {
         </div>
       ) : (
         <div className="relative">
-          <img src={capturedImage} alt="Captured" className='fixed right-0 bottom-0 min-w-full min-h-full' />
+          <img src={capturedImage} alt="Captured" className='fixed right-0 bottom-0 min-w-full min-h-full' onClick={() => setShowDetails(false)} />
           <button
             className="fixed top-0 right-0 mt-4 mr-4 px-4 py-4 bg-gray-800 text-white rounded-full"
             onClick={discardImage}
@@ -114,9 +130,51 @@ const CaptureComponent = () => {
             </svg>
           </button>
 
+          {
+            !showDetails && predictedClass && (
+              <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4" onClick={() => setShowDetails(true)}>
+                <p>
+                  Prediction : <span className="font-bold">{predictedClass}</span> with a probability of <span className="font-bold">{(predictedProbability * 100)?.toPrecision(4)} % </span>
+                </p>
+              </div>
+            )
+          }
+
+          {
+            showDetails && (
+              <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4" onClick={() => setShowDetails(false)}>
+                <h2 className="text-2xl font-bold">{predictedClass}</h2>
+                <p className="text-lg">Probability: {(predictedProbability * 100)?.toPrecision(4)} % </p>
+
+
+                <div className="border-b-2 border-white my-2"></div>
+                {/* seperator */}
+
+                <h3 className="text-xl font-bold">Overall Probabilities</h3>
+                <ul>
+                  {overallProbabilities.map((item, index) => (
+                    <li key={index}>
+                      <p>
+                        <span className="font-bold">
+                          {item.class} :
+                        </span>
+                        {/* space */}
+                        &nbsp;
+
+                        {` ${(item.probability * 100)?.toPrecision(3)}%`}
+
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
+
           {isLoading && (
             <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-              <div className="text-white font-bold text-2xl">Loading...</div>
+              <div className="text-white font-bold text-2xl">Loading...</div>\
+              <img src="/loading.svg" alt="loading" className="w-16 h-16" />
             </div>
           )}
 
