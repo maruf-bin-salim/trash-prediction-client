@@ -17,6 +17,6 @@ The website is primarily a single page application, where a user can
 ### Result
 
 <div style="display: flex; justify-content: space-between; gap: 10;">
-  <img src="https://github.com/marufbinsalim/trash-prediction-client/assets/161325766/a920b485-b798-45c3-8d76-511162ea9104" alt="Image 1" style="width: 250px; margin-right: 10px" />
+  <img src="https://github.com/marufbinsalim/trash-prediction-client/assets/161325766/a920b485-b798-45c3-8d76-511162ea9104" alt="Image 1" style="width: 250px; margin-right: 30px" />
   <img src="https://github.com/marufbinsalim/trash-prediction-client/assets/161325766/3318ede7-f82e-4eda-ab89-545b73eebda6" alt="Image 2" style="width: 250px;" />
 </div>
