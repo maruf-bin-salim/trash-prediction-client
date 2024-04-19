@@ -4,13 +4,44 @@ import Webcam from 'react-webcam';
 
 const CaptureComponent = () => {
   const [capturedImage, setCapturedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const webcamRef = useRef(null);
 
   async function captureImage() {
     const imageSrc = webcamRef.current.getScreenshot();
     setCapturedImage(imageSrc);
+
+    await getPrediction();
   };
+
+  async function getPrediction() {
+
+    setIsLoading(true);
+    // Send data to API endpoint as a POST request
+    try {
+
+      const response = await fetch('https://trash-detection-server.onrender.com/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image_link: capturedImage }),
+      });
+      const data = await response.json();
+
+      // expected response
+      // data = {"prediction":{"name":"cardboard","probability":0.7180725932121277},"overall_probabilities":[{"class":"cardboard","probability":0.7180725932121277},{"class":"metal","probability":0.2032327651977539},{"class":"trash","probability":0.04265006259083748},{"class":"plastic","probability":0.020296193659305573},{"class":"glass","probability":0.012044194154441357},{"class":"paper","probability":0.0037041513714939356}]}
+
+      console.log('Prediction:', data.prediction);
+      console.log('Overall probabilities:', data.overall_probabilities);
+
+    } catch (error) {
+      console.error('Error sending the snapshot:', error);
+    }
+
+    setIsLoading(false);
+  }
 
   const discardImage = () => {
     setCapturedImage(null);
@@ -82,6 +113,13 @@ const CaptureComponent = () => {
               />
             </svg>
           </button>
+
+          {isLoading && (
+            <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+              <div className="text-white font-bold text-2xl">Loading...</div>
+            </div>
+          )}
+
         </div>
 
       )}
