@@ -71,7 +71,7 @@ const CaptureComponent = () => {
     <div className="h-screen flex flex-col justify-center items-center">
 
       {!capturedImage ? (
-        <div className="relative w-full h-full bg-red-100 flex justifty-center items-center">
+        <div className="relative w-full h-full bg-[#1b1b1b] flex justifty-center items-center">
           <Webcam
             audio={false}
             ref={webcamRef}
