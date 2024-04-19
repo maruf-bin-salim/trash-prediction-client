@@ -109,7 +109,7 @@ const CaptureComponent = () => {
         </div>
       ) : (
         <div className="relative">
-          <img src={capturedImage} alt="Captured" className='fixed right-0 bottom-0 min-w-full min-h-full' onClick={() => setShowDetails(false)} />
+          <img src={capturedImage} alt="Captured" className='fixed right-0 bottom-0 min-w-full lg:min-h-full' onClick={() => setShowDetails(false)} />
           <button
             className="fixed top-0 right-0 mt-4 mr-4 px-4 py-4 bg-gray-800 text-white rounded-full"
             onClick={discardImage}
