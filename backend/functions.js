@@ -1,7 +1,7 @@
 import { app } from './firebase';
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore/lite';
-const database = getFirestore(app);
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
 
+const database = getFirestore(app);
 
 async function addTrashData(data) {
     try {
@@ -12,5 +12,13 @@ async function addTrashData(data) {
     }
 }
 
+async function getAllTrashData(setTrashData) {
+    const trashCollection = collection(database, "trash");
+    const unsubscribe = onSnapshot(trashCollection, (snapshot) => {
+        const trashList = snapshot.docs.map(doc => doc.data());
+        setTrashData(trashList);
+    });
+    return unsubscribe;
+}
 
-export { addTrashData }
+export { addTrashData, getAllTrashData };
