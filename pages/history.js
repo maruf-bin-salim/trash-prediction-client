@@ -1,15 +1,6 @@
 import { app } from '@/backend/firebase';
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
-
 const database = getFirestore(app);
-
-
-
-async function getAllTrashData(setTrashData) {
-    
-    return unsubscribe;
-}
-
 
 
 import { useEffect, useState } from "react"
