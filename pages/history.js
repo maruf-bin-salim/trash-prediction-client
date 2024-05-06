@@ -8,6 +8,7 @@ export default function History() {
     const [trashData, setTrashData] = useState([]);
     const [classes, setClasses] = useState(["cardboard", "glass", "metal", "paper", "plastic", "trash"]);
     const [countOfClasses, setCountOfClasses] = useState({});
+    const [severOn, setServerOn] = useState(false);
 
     async function handleRemoveAllPressed() {
         const trashCollection = collection(database, "trash");
@@ -41,12 +42,40 @@ export default function History() {
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-3xl font-bold mb-4">History</h1>
-            <button
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-                onClick={handleRemoveAllPressed}
-            >
-                Remove All
-            </button>
+            <div className="flex gap-2">
+                <button
+                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                    onClick={handleRemoveAllPressed}
+                >
+                    Remove All
+                </button>
+                <button className={`text-white font-bold py-2 px-4 rounded ${severOn ? "bg-green-500" : "bg-red-500"}`}
+                    onClick={async () => {
+                        try {
+                            const response = await fetch('https://trash-prediction-server.onrender.com/', {
+                                method: 'GET', // or 'POST', 'PUT', etc.
+                                // You can include headers or body if required
+                            });
+                            if (response.ok) {
+                                // Request was successful
+                                let data = await response.json();
+                                setServerOn(true);
+
+                                console.log('Request sent successfully.', data);
+                            } else {
+                                // Request failed
+                                console.error('Request failed.');
+                                setServerOn(false);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }}
+                >
+                    Turn On Server
+                </button>
+
+            </div>
 
             <h2 className="text-xl mt-4">Total Trash Predicted: {trashData.length}</h2>
             <h2 className="text-xl mt-4">Count of Classes</h2>
