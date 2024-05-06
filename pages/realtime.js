@@ -7,13 +7,16 @@ import { useEffect, useState } from "react"
 
 export default function Realtime() {
 
-    const [trashData, setTrashData] = useState([])
+    const [trashData, setTrashData] = useState(null)
 
     useEffect(() => {
         const trashCollection = collection(database, "trash");
         const unsubscribe = onSnapshot(trashCollection, (snapshot) => {
             const trashList = snapshot.docs.map(doc => doc.data());
-            setTrashData(trashList);
+            // get single trash that has the highest timestamp
+            trashList.sort((a, b) => b.timestamp - a.timestamp);
+            let trashItem = trashList.length > 0 ? trashList[0] : null;
+            setTrashData(trashItem);
         });
 
         return () => {
@@ -25,19 +28,17 @@ export default function Realtime() {
 
     return (
         <div>
-            <h1>Realtime</h1>
+            <h1>Realtime : Latest Predicted Trash Item</h1>
             {
-                trashData?.map((data, index) => {
-                    return (
-                        <div key={index}>
-                            <img src={data.image_link} alt="Trash" width={500} />
-                            <p>Class: {data.prediction.name}</p>
-                            <p>Probability: {data.prediction.probability}</p>
-                        </div>
-                    )
-                }
-                )
+                trashData &&
+                <div >
+                    <img src={trashData.image_link} alt="Trash" width={500} />
+                    <p>Class: {trashData.prediction.name}</p>
+                    <p>Probability: {trashData.prediction.probability}</p>
+                </div>
             }
+
+
         </div>
     )
 }
