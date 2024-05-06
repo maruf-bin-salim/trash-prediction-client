@@ -28,7 +28,14 @@ export default function Realtime() {
 
     return (
         <div className="container mx-auto px-4">
-            <h1 className="text-3xl font-bold mb-4">Realtime: Latest Predicted Trash Item</h1>
+            {
+                trashData !== null ? (
+
+                    <h1 className="text-3xl font-bold mb-4">Realtime: Latest Predicted Trash Item</h1>
+                ) : (
+                    <h1 className="text-3xl font-bold mb-4">Realtime: No Predicted Trash Item</h1>
+                )
+            }
             {trashData && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <img src={trashData.image_link} alt="Trash" className="mb-4 rounded-lg" style={{ maxWidth: "100%" }} />

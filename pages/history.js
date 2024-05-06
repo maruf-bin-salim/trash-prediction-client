@@ -9,6 +9,7 @@ export default function History() {
     const [classes, setClasses] = useState(["cardboard", "glass", "metal", "paper", "plastic", "trash"]);
     const [countOfClasses, setCountOfClasses] = useState({});
     const [severOn, setServerOn] = useState(false);
+    const [serverLoading, setServerLoading] = useState(false);
 
     async function handleRemoveAllPressed() {
         const trashCollection = collection(database, "trash");
@@ -49,31 +50,45 @@ export default function History() {
                 >
                     Remove All
                 </button>
-                <button className={`text-white font-bold py-2 px-4 rounded ${severOn ? "bg-green-500" : "bg-red-500"}`}
-                    onClick={async () => {
-                        try {
-                            const response = await fetch('https://trash-prediction-server.onrender.com/', {
-                                method: 'GET', // or 'POST', 'PUT', etc.
-                                // You can include headers or body if required
-                            });
-                            if (response.ok) {
-                                // Request was successful
-                                let data = await response.json();
-                                setServerOn(true);
+                {
+                    serverLoading &&
+                    <div className="text-white font-bold py-2 px-4 rounded bg-blue-500">
+                        Turning On Server...
+                    </div>
+                }
+                {
+                    !serverLoading &&
+                    <button className={`text-white font-bold py-2 px-4 rounded ${severOn ? "bg-green-500" : "bg-red-500"}`}
+                        onClick={async () => {
+                            try {
+                                setServerLoading(true);
+                                const response = await fetch('https://trash-prediction-server.onrender.com/', {
+                                    method: 'GET', // or 'POST', 'PUT', etc.
+                                    // You can include headers or body if required
+                                });
 
-                                console.log('Request sent successfully.', data);
-                            } else {
-                                // Request failed
-                                console.error('Request failed.');
-                                setServerOn(false);
+                                if (response.ok) {
+                                    // Request was successful
+                                    let data = await response.json();
+                                    setServerOn(true);
+                                    setServerLoading(false);
+
+                                    console.log('Request sent successfully.', data);
+                                } else {
+                                    // Request failed
+                                    console.error('Request failed.');
+                                    setServerOn(false);
+                                    setServerLoading(false);
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
                             }
-                        } catch (error) {
-                            console.error('Error:', error);
-                        }
-                    }}
-                >
-                    Turn On Server
-                </button>
+                        }}
+                    >
+                        Turn On Server
+                    </button>
+                }
+
 
             </div>
 
