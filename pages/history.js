@@ -92,6 +92,19 @@ export default function History() {
                         <img src={data.image_link} alt="Trash" className="mb-2" style={{ maxWidth: "100%" }} />
                         <p><strong>Class:</strong> {data.prediction.name}</p>
                         <p><strong>Probability:</strong> {(data.prediction.probability * 100).toFixed(2)}%</p>
+                        <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-2"
+                            onClick={async () => {
+                                const trashCollection = collection(database, "trash");
+                                const q = query(trashCollection, where("timestamp", "==", data.timestamp));
+                                const querySnapshot = await getDocs(q);
+                                querySnapshot.forEach(async (doc) => {
+                                    await deleteDoc(doc.ref);
+                                });
+                            }
+                            }
+                        >
+                            Remove
+                        </button>
                     </div>
                 ))}
             </div>
