@@ -1,13 +1,11 @@
 import { app } from '@/backend/firebase';
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
+import { useEffect, useState } from "react";
+
 const database = getFirestore(app);
 
-
-import { useEffect, useState } from "react"
-
 export default function History() {
-
-    const [trashData, setTrashData] = useState([])
+    const [trashData, setTrashData] = useState([]);
     const [classes, setClasses] = useState(["cardboard", "glass", "metal", "paper", "plastic", "trash"]);
     const [countOfClasses, setCountOfClasses] = useState({});
 
@@ -18,8 +16,6 @@ export default function History() {
             await deleteDoc(doc.ref);
         });
     }
-
-
 
     useEffect(() => {
         const trashCollection = collection(database, "trash");
@@ -38,45 +34,38 @@ export default function History() {
         });
 
         return () => {
-            unsubscribe()
-        }
-    }
-        , [])
-
+            unsubscribe();
+        };
+    }, []);
 
     return (
-        <div>
-            <h1>History</h1>
-            <button onClick={handleRemoveAllPressed}>
+        <div className="container mx-auto p-4">
+            <h1 className="text-3xl font-bold mb-4">History</h1>
+            <button
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                onClick={handleRemoveAllPressed}
+            >
                 Remove All
             </button>
 
-            <h2>
-                Total Trash Predicted: {trashData.length}
-            </h2>
-            <h2>Count of Classes</h2>
-            {
-                classes.map((data, index) => {
-                    return (
-                        <div key={index}>
-                            <p>{data}: {countOfClasses[data]}</p>
-                        </div>
-                    )
-
-                })
-            }
-            {
-                trashData?.map((data, index) => {
-                    return (
-                        <div key={index}>
-                            <img src={data.image_link} alt="Trash" width={500} />
-                            <p>Class: {data.prediction.name}</p>
-                            <p>Probability: {data.prediction.probability}</p>
-                        </div>
-                    )
-                }
-                )
-            }
+            <h2 className="text-xl mt-4">Total Trash Predicted: {trashData.length}</h2>
+            <h2 className="text-xl mt-4">Count of Classes</h2>
+            <div className="grid grid-cols-2 gap-4">
+                {classes.map((data, index) => (
+                    <div key={index} className="bg-gray-200 p-4 rounded">
+                        <p className="text-lg">{data}: {countOfClasses[data]}</p>
+                    </div>
+                ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {trashData.map((data, index) => (
+                    <div key={index} className="bg-gray-200 p-4 rounded">
+                        <img src={data.image_link} alt="Trash" className="mb-2" style={{ maxWidth: "100%" }} />
+                        <p><strong>Class:</strong> {data.prediction.name}</p>
+                        <p><strong>Probability:</strong> {(data.prediction.probability * 100).toFixed(2)}%</p>
+                    </div>
+                ))}
+            </div>
         </div>
-    )
+    );
 }
