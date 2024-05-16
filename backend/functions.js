@@ -21,4 +21,33 @@ async function getAllTrashData(setTrashData) {
     return unsubscribe;
 }
 
-export { addTrashData, getAllTrashData };
+async function addCapture() {
+
+    const caputreCollection = collection(database, "capture");
+    const docRef = await addDoc(caputreCollection, {
+        timestamp: Date.now(),
+    });
+}
+
+async function getLatestTrashData() {
+    const trashCollection = collection(database, "trash");
+    const q = query(trashCollection, where("timestamp", ">", 0));
+    const querySnapshot = await getDocs(q);
+    let trashList = querySnapshot.docs.map(doc => doc.data());
+    trashList.sort((a, b) => b.timestamp - a.timestamp);
+
+    if(!trashList || trashList.length === 0) {
+        return null;
+    }
+    else {
+        let result = {
+            ...trashList[0],
+        }
+        
+        // remove image_link
+        delete result.image_link;
+        return result;
+    }
+}
+
+export { addTrashData, getAllTrashData, addCapture, getLatestTrashData };
