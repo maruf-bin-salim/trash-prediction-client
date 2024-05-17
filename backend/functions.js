@@ -34,7 +34,7 @@ async function addCapture() {
         let captures = captureSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Get the latest capture based on timestamp
-        let latestCapture = captures.sort((a, b) => b.timestamp - a.timestamp)[0];
+        let latestCapture = captures[0];
 
         if (!latestCapture) {
             console.log("No captures found.");

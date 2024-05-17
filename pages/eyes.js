@@ -34,18 +34,33 @@ const CaptureComponent = () => {
 
 
 
+  const isFirstSnapshot = useRef(true);
+
   useEffect(() => {
     const database = getFirestore(app);
     const captureCollection = collection(database, "capture");
+
     const unsubscribe = onSnapshot(captureCollection, (snapshot) => {
       console.log('snapshot', snapshot);
       const captureList = snapshot.docs.map(doc => doc.data());
-      // Get the single trash item with the highest timestamp
-      if (captureList && captureList.length > 0) {
+
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added") {
+          console.log("New document added: ", change.doc.data());
+        }
+        if (change.type === "modified") {
+          console.log("Document modified: ", change.doc.data());
+        }
+        if (change.type === "removed") {
+          console.log("Document removed: ", change.doc.data());
+        }
+      });
+
+      if (!isFirstSnapshot.current && captureList && captureList.length > 0) {
         captureImage();
       }
 
-
+      isFirstSnapshot.current = false;
     });
 
     return () => {
