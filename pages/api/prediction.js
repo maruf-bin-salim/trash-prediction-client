@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import { getLatestTrashData } from "@/backend/functions";
+import { getPrediction } from "@/backend/functions";
 
 let classes = ["cardboard", "glass", "metal", "paper", "plastic", "trash"];
 
@@ -16,17 +16,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    let data = await getLatestTrashData();
-
-    if (!data) {
-      res.status(200).json(null);
-      return;
-    }
+    let data = await getPrediction();
 
     res.status(200).json({
-      class: data.prediction.name,
-    });
+      class: data || 'unknown'
+    })
+
+
+
   } catch (error) {
-    res.status(500).json({ message: "Error adding data" });
+    console.log(error);
+    res.status(500).json({ message: "Error getting data" });
   }
 }

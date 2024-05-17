@@ -1,5 +1,5 @@
 import { app } from './firebase';
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, doc } from 'firebase/firestore';
 
 const database = getFirestore(app);
 
@@ -23,31 +23,76 @@ async function getAllTrashData(setTrashData) {
 
 async function addCapture() {
 
-    const caputreCollection = collection(database, "capture");
-    const docRef = await addDoc(caputreCollection, {
-        timestamp: Date.now(),
-    });
-}
+    try {
+        // Reference to the "capture" collection
+        let collectionRef = collection(database, "capture");
 
-async function getLatestTrashData() {
-    const trashCollection = collection(database, "trash");
-    const q = query(trashCollection, where("timestamp", ">", 0));
-    const querySnapshot = await getDocs(q);
-    let trashList = querySnapshot.docs.map(doc => doc.data());
-    trashList.sort((a, b) => b.timestamp - a.timestamp);
+        // Get all documents from the "capture" collection
+        let captureSnapshot = await getDocs(collectionRef);
 
-    if(!trashList || trashList.length === 0) {
-        return null;
-    }
-    else {
-        let result = {
-            ...trashList[0],
+        // Map documents to an array of data
+        let captures = captureSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Get the latest capture based on timestamp
+        let latestCapture = captures.sort((a, b) => b.timestamp - a.timestamp)[0];
+
+        if (!latestCapture) {
+            console.log("No captures found.");
+            return;
         }
-        
-        // remove image_link
-        delete result.image_link;
-        return result;
+
+        // Update the latest capture document's timestamp
+        let captureRef = doc(database, "capture", latestCapture.id);
+        await updateDoc(captureRef, { timestamp: Date.now() });
+
+        console.log("Document updated with ID: ", latestCapture.id);
+    } catch (error) {
+        console.error("Error updating document: ", error);
     }
 }
 
-export { addTrashData, getAllTrashData, addCapture, getLatestTrashData };
+async function getPrediction() {
+
+    // Reference to the "capture" collection
+    let collectionRef = collection(database, "prediction");
+
+    // Get all documents from the "capture" collection
+    let predictionSnapshot = await getDocs(collectionRef);
+
+    // Map documents to an array of data
+    let predictions = predictionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Get the latest capture based on timestamp
+    let latest = predictions[0];
+
+    console.log("Latest prediction: ", latest);
+
+    return latest?.class || null;
+}
+
+async function updatePrediction(className) {
+    try {
+        // Reference to the "capture" collection
+        let collectionRef = collection(database, "prediction");
+
+        // Get all documents from the "capture" collection
+        let predictionSnapshot = await getDocs(collectionRef);
+
+        // Map documents to an array of data
+        let predictions = predictionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Get the latest capture based on timestamp
+        let latest = predictions[0];
+
+        // Update the latest capture document's timestamp
+        let latestRef = doc(database, "prediction", latest.id);
+        await updateDoc(latestRef, { class: className });
+
+        console.log("Document updated with ID: ", latest.id);
+    } catch (error) {
+        console.error("Error updating prediction document: ", error);
+    }
+}
+
+
+export { addTrashData, getAllTrashData, addCapture, getPrediction, updatePrediction };

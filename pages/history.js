@@ -17,6 +17,15 @@ export default function History() {
         snapshot.forEach(async (doc) => {
             await deleteDoc(doc.ref);
         });
+
+        // remove capture
+
+        const caputreCollection = collection(database, "capture");
+        const snapshotCapture = await getDocs(caputreCollection);
+        console.log('snapshotCapture', snapshotCapture);
+        snapshotCapture.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
     }
 
     useEffect(() => {
@@ -41,18 +50,18 @@ export default function History() {
     }, []);
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-4">History</h1>
+        <div className="container p-4 mx-auto">
+            <h1 className="mb-4 text-3xl font-bold">History</h1>
             <div className="flex gap-2">
                 <button
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                    className="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-600"
                     onClick={handleRemoveAllPressed}
                 >
                     Remove All
                 </button>
                 {
                     serverLoading &&
-                    <div className="text-white font-bold py-2 px-4 rounded bg-blue-500">
+                    <div className="px-4 py-2 font-bold text-white bg-blue-500 rounded">
                         Turning On Server...
                     </div>
                 }
@@ -92,22 +101,22 @@ export default function History() {
 
             </div>
 
-            <h2 className="text-xl mt-4">Total Trash Predicted: {trashData.length}</h2>
-            <h2 className="text-xl mt-4">Count of Classes</h2>
+            <h2 className="mt-4 text-xl">Total Trash Predicted: {trashData.length}</h2>
+            <h2 className="mt-4 text-xl">Count of Classes</h2>
             <div className="grid grid-cols-2 gap-4">
                 {classes.map((data, index) => (
-                    <div key={index} className="bg-gray-200 p-4 rounded">
+                    <div key={index} className="p-4 bg-gray-200 rounded">
                         <p className="text-lg">{data}: {countOfClasses[data]}</p>
                     </div>
                 ))}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2">
                 {trashData.map((data, index) => (
-                    <div key={index} className="bg-gray-200 p-4 rounded">
+                    <div key={index} className="p-4 bg-gray-200 rounded">
                         <img src={data.image_link} alt="Trash" className="mb-2" style={{ maxWidth: "100%" }} />
                         <p><strong>Class:</strong> {data.prediction.name}</p>
                         <p><strong>Probability:</strong> {(data.prediction.probability * 100).toFixed(2)}%</p>
-                        <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-2"
+                        <button className="px-4 py-2 mt-2 font-bold text-white bg-red-500 rounded hover:bg-red-600"
                             onClick={async () => {
                                 const trashCollection = collection(database, "trash");
                                 const q = query(trashCollection, where("timestamp", "==", data.timestamp));

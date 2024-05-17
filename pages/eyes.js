@@ -2,7 +2,8 @@ import useWindowSize from '@/hooks/useSize';
 import { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { app } from '@/backend/firebase';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, addDoc } from 'firebase/firestore';
+import { updatePrediction } from '@/backend/functions';
 let classes = ["cardboard", "glass", "metal", "paper", "plastic", "trash"]
 
 const CaptureComponent = () => {
@@ -32,17 +33,18 @@ const CaptureComponent = () => {
   }, [capturedImage]);
 
 
-  const [captureLength, setCaptureLength] = useState(0);
 
   useEffect(() => {
     const database = getFirestore(app);
     const captureCollection = collection(database, "capture");
     const unsubscribe = onSnapshot(captureCollection, (snapshot) => {
+      console.log('snapshot', snapshot);
       const captureList = snapshot.docs.map(doc => doc.data());
       // Get the single trash item with the highest timestamp
-      if (captureList && captureList.length) {
-        setCaptureLength(captureList.length);
+      if (captureList && captureList.length > 0) {
+        captureImage();
       }
+
 
     });
 
@@ -52,14 +54,7 @@ const CaptureComponent = () => {
   }, []);
 
 
-  useEffect(() => {
 
-    // simulate button Click 
-    if (captureLength > 0) {
-      captureImage();
-    }
-
-  }, [captureLength]);
 
 
   async function getPrediction() {
@@ -76,6 +71,13 @@ const CaptureComponent = () => {
         body: JSON.stringify({ image_link: capturedImage }),
       });
       const data = await response.json();
+
+
+
+      // update the last prediction in the database
+      await updatePrediction(data.prediction.name);
+
+
       setPredictedClass(data.prediction.name);
       setPredictedProbability(data.prediction.probability);
       setOverallProbabilities(data.overall_probabilities);
