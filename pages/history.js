@@ -18,14 +18,8 @@ export default function History() {
             await deleteDoc(doc.ref);
         });
 
-        // remove capture
 
-        const caputreCollection = collection(database, "capture");
-        const snapshotCapture = await getDocs(caputreCollection);
-        console.log('snapshotCapture', snapshotCapture);
-        snapshotCapture.forEach(async (doc) => {
-            await deleteDoc(doc.ref);
-        });
+      
     }
 
     useEffect(() => {
